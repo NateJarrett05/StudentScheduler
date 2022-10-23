@@ -1,0 +1,15 @@
+What needs to be finished:
+
+- Assigning classes to advanced math kids
+
+- Create class rosters and put them on the google sheet
+
+- Make it easier to run for when I pass on the code
+
+URL for running the code:
+
+http://localhost:1337/
+
+Command for initializing the code:
+
+nodemon index.js (replace index.js with whatever the file name is)
