@@ -1,6 +1,5 @@
 class School {
     constructor(gradeSelection){
-
         this.classSize = 32;
         this.schoolSize = 128;
         this.batchCount = 4;
@@ -64,16 +63,28 @@ class School {
         return this.allPeriods[period].indexOf(class_name);
     }
 
-    return_class(period, classIndex){
+    get_class_name(period, classIndex){
         return this.allPeriods[period][classIndex];
     }
 
-    return_lowRSP_period(period){
+    get_lowRSP_schedule(){
+        return this.lowRSP_Schedule;
+    }
+
+    get_highRSP_schedule(){
+        return this.highRSP_Schedule;
+    }
+
+    get_lowRSP_period(period){
         return this.lowRSP_Schedule[period];
     }
 
-    return_highRSP_period(period){
+    get_highRSP_period(period){
         return this.highRSP_Schedule[period];
+    }
+
+    get_class_list(){
+        return this.classList;
     }
 
     checkPeriod(schedule, period){

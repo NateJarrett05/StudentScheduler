@@ -1,8 +1,6 @@
-var schoolFile = require("./school")
-var studentFile = require("./student")
-var counterFile = require("./counter")
-
-
+const { School } = require("./school");
+const { Student } = require("./student");
+const { Counter } = require("./counter")
 
 const express = require("express");
 const { GoogleAuth } = require("google-auth-library");
@@ -12,8 +10,8 @@ const app = express();
 
 const gradeSelection = 7;
 
-var school = new schoolFile.School(gradeSelection);
-var counter = new counterFile.Counter();
+var school = new School(gradeSelection);
+var counter = new Counter();
 
 var finalSchedules = []
 
@@ -72,36 +70,41 @@ app.get("/", async (req, res) => {
 
   //assigning student data
   var students = [];
-  for(let student = 1; student < All7thStudentData.length; student++){
-    students.push(new studentFile.Student(All7thStudentData[student]));
+  for(let student_index = 1; student_index < All7thStudentData.length; student_index++){
+    students.push(new Student(All7thStudentData[student_index], counter));
   }
 
   //assigning student schedules
-  for(let student = 0; student < students.length; student++){
-    if(students[student].low_rsp){
-      student.schedule = school.lowRSP_Schedule;
+  for(let student_index = 0; student_index < students.length; student_index++){
+    // check for low RSP student
+    if(students[student_index].get_lowRSP() == true){
+      students[student_index].set_schedule(school.get_highRSP_schedule());
     }
-    else if(students[student].high_rsp){
-      student.schedule = school.highRSP_Schedule;
+    // check for high RSP student
+    else if(students[student_index].get_highRSP() == true){
+      students[student_index].set_schedule(school.get_highRSP_schedule());
     }
-    else if(students[student].advancedMath){
+    // check for adv math student
+    else if(students[student_index].get_advMath() == true){
       //blah blah blah code goes here
     }
+    // default for basic student setup
     else{
-      var failed = students[student].assignPeriods()
+      var failed = students[student_index].assignPeriods()
     }
-
+    // iterations failed, reset classes counters and schedules then run it back
     if(failed){
       finalSchedules = [];
-      school.reset();
-      counter.reset();
-      students[student].reset();
+      school.reset_periods();
+      counter.reset_counter();
+      students[student_index].reset_schedule();
     }
+    // iterations succeeded so push that schedule to the final array of schedules
     else{
-      finalSchedules.push(students[student].name, students[student].schedule[0], students[student].schedule[1], students[student].schedule[2], students[student].schedule[3], students[student].schedule[4]);
+      finalSchedules.push(students[student_index].name, students[student_index].schedule[0], students[student_index].schedule[1], students[student_index].schedule[2], students[student_index].schedule[3], students[student_index].schedule[4]);
     }
-
-    if(student == (students.length - 1)){
+    // last student alert succeded, mark complete as true
+    if(student_index == (students.length - 1)){
       complete = true;
     }
   }
@@ -138,9 +141,8 @@ app.get("/", async (req, res) => {
     }
   }
   */
-  console.log("\n")
 
-  //adding schedules to sheet
+  // adding schedules to sheet
   for(let student = 0; student < finalSchedules.length; student++){
     await googleSheets.spreadsheets.values.append({
       auth,

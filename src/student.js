@@ -1,8 +1,9 @@
-const { Counter } = require("./counter");
+const { School } = require("./school");
 
-class Student extends Counter{
-    constructor(data) {
+class Student extends School{
+    constructor(data, Counter) {
         super();
+        this.Counter = Counter;
         this.name = data[0];
         this.gender = data[1];
         this.low_rsp = (data[2] == "TRUE");
@@ -12,17 +13,21 @@ class Student extends Counter{
         this.schedule = [];
     }
 
+    set_schedule(schedule){
+        this.schedule = schedule;
+    }
+
     assignPeriods(){
             var trys = 0;
             var failed = false;
             var tempSchedule = [];
             for(let period = 1; period < 6; period++){
-                var randClass = this.getClass(period-1);
-                var randClassName = this.allPeriods[period-1][randClass];
-                
+                var randClass = this.get_random_class(period - 1);
+                var randClassName = this.get_class_name(period, randClass);
+
                 if(this.checkPeriod(tempSchedule, randClass)){
                     tempSchedule.push(randClassName);
-                    this.allPeriodCounters[period-1][randClass];
+                    this.Counter.increase_counter(period - 1, randClass);
                     trys = 0;
                 }
             
@@ -30,21 +35,16 @@ class Student extends Counter{
                     trys++;
                     period--;
                     if(trys > 10){
-                        var availablePeriods = this.checkAvailable()
-                        console.log(availablePeriods)
-                        console.log(this.classList)
-                        
-                        var loop = 0
-                        var availablePeriodsCopy = availablePeriods;
-                        var classListCopy = this.classList;
+                        var loop = 0;
                         
                         //make sure to assign the copies to the originals at the end
                         while(true){
-                            availablePeriodsCopy = availablePeriods;
-                            classListCopy = this.classList;
+                            var classListCopy = this.get_class_list();
+                            var availablePeriodsCopy = this.checkAvailable();
                             var newSchedule = [];
                             loop++;
                             
+                            // Too many L's so exit
                             if(loop > 5){
                                 failed = true;
                                 break;
@@ -53,6 +53,7 @@ class Student extends Counter{
                             for(let z = 0; z < classListCopy.length; z++){
                                 for(let x = 0; x < availablePeriodsCopy.length; x++){
                                     for(let y = 0; y < availablePeriodsCopy[x].length; y++){
+                                        //
                                         if(availablePeriodsCopy[x][y] == z){
                                             newSchedule.push(classListCopy[x]);
                                             availablePeriodsCopy.splice(x, 1);
@@ -62,19 +63,21 @@ class Student extends Counter{
                                 }
                             }
                             
+                            // Win condition
                             if(newSchedule.length == 5){
-                                this.increaseCounter(newSchedule);
-                                resolved = true;
+                                this.Counter.increase_counter_schedule(newSchedule);
                                 this.schedule = newSchedule;
+                                resolved = true;
                                 break;
                             }
                         }
                         
+                        // Break if win condition is true
                         if(resolved == true){
                             break;
                         }
                         
-                        //resetting variables
+                        // Resetting variables
                         period++;
                         trys = 0;
                     } 
@@ -83,7 +86,31 @@ class Student extends Counter{
             return failed
     }
 
-    reset(){
+    get_name(){
+        return this.name;
+    }
+
+    get_gender(){
+        return this.gender;
+    }
+
+    get_lowRSP(){
+        return this.low_RSP;
+    }
+
+    get_highRSP(){
+        return this.high_RSP;
+    }
+
+    get_advMath(){
+        return this.adv_math;
+    }
+
+    get_behavior(){
+        return this.behavior;
+    }
+
+    reset_schedule(){
         this.schedule = []
     }
 }
