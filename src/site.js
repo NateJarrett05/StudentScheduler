@@ -31,13 +31,13 @@ app.get("/", async (req, res) => {
     scopes: "https://www.googleapis.com/auth/spreadsheets"
   });
 
-  //google sheet parameters
+  // google sheet parameters
   const client = await auth.getClient();
   const googleSheets = google.sheets({version: "v4", auth: client});
   const spreadsheetId = "1iruoDBT6VvqNUWacKYTax9UIg5iJGcKMkmJOvBNQLPE";
   const sheetId = "1453565053";
 
-  //getting data from google sheet
+  // getting data from google sheet
   googleSheets.spreadsheets.batchUpdate({
     auth: auth,
     spreadsheetId: spreadsheetId,
@@ -60,21 +60,23 @@ app.get("/", async (req, res) => {
     }
   })
 
-  //getting student data from the sheet, need to make this change depending on grade selection
+  // getting student data from the sheet, need to make this change depending on grade selection
   const getRows7th = await googleSheets.spreadsheets.values.get({
     auth,
     spreadsheetId,
     range: "StudentData7th"
   });
+ 
   var All7thStudentData = getRows7th.data.values
 
-  //assigning student data
+  // assigning student data
   var students = [];
   for(let student_index = 1; student_index < All7thStudentData.length; student_index++){
     students.push(new Student(All7thStudentData[student_index], counter));
   }
 
-  //assigning student schedules
+  var attempts = 0;
+  // assigning student schedules
   for(let student_index = 0; student_index < students.length; student_index++){
     // check for low RSP student
     if(students[student_index].get_lowRSP() == true){
@@ -86,11 +88,11 @@ app.get("/", async (req, res) => {
     }
     // check for adv math student
     else if(students[student_index].get_advMath() == true){
-      //blah blah blah code goes here
+      // blah blah blah code goes here
     }
     // default for basic student setup
     else{
-      var failed = students[student_index].assignPeriods()
+      var failed = students[student_index].assign_periods()
     }
     // iterations failed, reset classes counters and schedules then run it back
     if(failed){
@@ -98,6 +100,8 @@ app.get("/", async (req, res) => {
       school.reset_periods();
       counter.reset_counter();
       students[student_index].reset_schedule();
+      student_index = 0;
+      attempts++;
     }
     // iterations succeeded so push that schedule to the final array of schedules
     else{
@@ -107,40 +111,15 @@ app.get("/", async (req, res) => {
     if(student_index == (students.length - 1)){
       complete = true;
     }
+    
+    counter.remove_full();
   }
 
-  //this shit does NOT work
-  //editting advanced math after creating the schedules
-  /*
-  for(let n = 0; n < advancedMathKidsIndex.length; n++){
-    if(finalSchedules[advancedMathKidsIndex[n]][5] == "math"){
-      console.log(finalSchedules[advancedMathKidsIndex[n]]);
-      advancedMathKidsIndex.splice(n, 1)
-    }
-  }
-  for(let p = 0; p < finalSchedules.length; p++){
-    if(finalSchedules[p][5] == "math"){
-      if(advancedMathKids.indexOf(finalSchedules[p][0]) == -1 && finalSchedules[advancedMathKidsIndex[0]][5] != "math"){
+  // advanced math schedules
+  // blah blah blah code goes here
 
-        var sName = finalSchedules[p][0]
-        finalSchedules[p][0] = finalSchedules[advancedMathKidsIndex[0]][0]
-        finalSchedules[advancedMathKidsIndex[0]][0] = sName;
-
-        advancedMathKidsIndex.splice(0, 1)
-      }
-    }
-  }
-  */
-
-  //this shit also does NOT work
-  //debugging math I think
-  /*
-  for(let p = 0; p < finalSchedules.length; p++){
-    if(finalSchedules[p][5] == "math"){
-      console.log(finalSchedules[p])
-    }
-  }
-  */
+  // make class rosters
+  // blah blah blah code goes here
 
   // adding schedules to sheet
   for(let student = 0; student < finalSchedules.length; student++){
@@ -157,11 +136,8 @@ app.get("/", async (req, res) => {
     })
   }
 
-  //make class rosters
-  //blah blah blah code goes here
-
   //send message to site
-  res.send(counter + " attemps to finish")
+  res.send(attempts + " attemps to finish")
 });
 
 app.listen(1337, (req, res) => console.log("running on 1337"))

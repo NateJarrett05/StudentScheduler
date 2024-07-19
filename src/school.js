@@ -32,7 +32,7 @@ class School {
             ];
     }
 
-    checkAvailable(){
+    check_available(){
         var periodList = this.allPeriods;
         var availablePeriods = [[0], 
                             [], 

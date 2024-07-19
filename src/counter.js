@@ -18,7 +18,7 @@ class Counter extends School{
 
 
     //Watch out for the variables in school not updated properly because this is an instance of the class?
-    checkFull(){
+    remove_full(){
       for(let i = 0; i < this.allPeriodCounter.length; i++){
         for(let k = 0; k < this.allPeriodCounter[i].length; k++){
           if(this.get_class_counter(i, k) >= class_size){

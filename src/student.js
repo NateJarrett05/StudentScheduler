@@ -17,73 +17,65 @@ class Student extends School{
         this.schedule = schedule;
     }
 
-    assignPeriods(){
-            var trys = 0;
-            var failed = false;
-            var tempSchedule = [];
-            for(let period = 1; period < 6; period++){
+    assign_periods(){
+        var failed = false;
+        var random_failed = false;
+        var new_schedule = [];
+        // loop for each period in the new schedule
+        for(let period = 1; period < 6; period++){
+            // try random selections 10 times before switching
+            for(let trys_random = 1; trys_random <= 10; trys_random++){
                 var randClass = this.get_random_class(period - 1);
                 var randClassName = this.get_class_name(period, randClass);
-
-                if(this.checkPeriod(tempSchedule, randClass)){
-                    tempSchedule.push(randClassName);
+                // random class picked isnt already in schedule
+                if(this.checkPeriod(new_schedule, randClass)){
+                    new_schedule.push(randClassName);
                     this.Counter.increase_counter(period - 1, randClass);
-                    trys = 0;
+                    break;
                 }
-            
-                else{
-                    trys++;
-                    period--;
-                    if(trys > 10){
-                        var loop = 0;
-                        
-                        //make sure to assign the copies to the originals at the end
-                        while(true){
-                            var classListCopy = this.get_class_list();
-                            var availablePeriodsCopy = this.checkAvailable();
-                            var newSchedule = [];
-                            loop++;
-                            
-                            // Too many L's so exit
-                            if(loop > 5){
-                                failed = true;
-                                break;
-                            }
-                            
-                            for(let z = 0; z < classListCopy.length; z++){
-                                for(let x = 0; x < availablePeriodsCopy.length; x++){
-                                    for(let y = 0; y < availablePeriodsCopy[x].length; y++){
-                                        //
-                                        if(availablePeriodsCopy[x][y] == z){
-                                            newSchedule.push(classListCopy[x]);
-                                            availablePeriodsCopy.splice(x, 1);
-                                            classListCopy.splice(x, 1);
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            // Win condition
-                            if(newSchedule.length == 5){
-                                this.Counter.increase_counter_schedule(newSchedule);
-                                this.schedule = newSchedule;
-                                resolved = true;
-                                break;
-                            }
-                        }
-                        
-                        // Break if win condition is true
-                        if(resolved == true){
-                            break;
-                        }
-                        
-                        // Resetting variables
-                        period++;
-                        trys = 0;
-                    } 
+                else if(trys_random == 10){
+                    random_failed = true;
                 }
             }
-            return failed
+            // the switch
+            if(random_failed){
+                var availablePeriods = this.check_available();
+                var classList = this.get_class_list();
+                // try the method 5 times before calling it a bust
+                for(let selection_trys = 1; selection_trys <= 5; selection_trys++){
+                    // resetting initial lists for a new attempt
+                    var classListCopy = classList;
+                    var availablePeriodsCopy = availablePeriods;
+                    var temp_schedule = [];
+
+                    // main selection logic block
+                    for(let z = 0; z < classListCopy.length; z++){
+                        for(let x = 0; x < availablePeriodsCopy.length; x++){
+                            for(let y = 0; y < availablePeriodsCopy[x].length; y++){
+                                if(availablePeriodsCopy[x][y] == z){
+                                    temp_schedule.push(classListCopy[x]);
+                                    availablePeriodsCopy.splice(x, 1);
+                                    classListCopy.splice(x, 1);
+                                }
+                            }
+                        }
+                    }
+
+                    // win condition
+                    if(temp_schedule.length == 5){
+                        this.Counter.increase_counter_schedule(temp_schedule);
+                        this.schedule = temp_schedule;
+                        resolved = true;
+                        break;
+                    }
+                    // fail condition
+                    if(selection_trys == 5){
+                        failed = true;
+                    }
+                }
+            }
+        }
+        return failed
     }
 
     get_name(){
